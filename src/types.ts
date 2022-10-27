@@ -1,5 +1,25 @@
-export type TvShow = {
+export type TvShowResponse = {
+  score: number;
+  show: TvShow;
+};
+
+export type TvShowSeason = {
   id: number;
+  url: string;
+  number: number;
+  name: string;
+  episodeOrder: number;
+  premiereDate?: string;
+  endDate?: string;
+  network?: any;
+  webChannel: WebChannel;
+  image: Image;
+  summary: string;
+  _links: Links;
+};
+
+export type TvShow = {
+  id: string;
   url: string;
   name: string;
   type: string;
@@ -24,44 +44,51 @@ export type TvShow = {
   _links: Links;
 };
 
-interface Links {
+type Links = {
   self: Self;
   previousepisode: Self;
-}
+};
 
-interface Self {
+type Self = {
   href: string;
-}
+};
 
-interface Image {
-  medium: string;
-  original: string;
-}
+type Image = {
+  medium?: string;
+  original?: string;
+};
 
-interface Externals {
+type Externals = {
   tvrage: number;
   thetvdb: number;
   imdb: string;
-}
+};
 
-interface Network {
+type Network = {
   id: number;
   name: string;
   country: Country;
   officialSite: string;
-}
+};
 
-interface Country {
+type Country = {
   name: string;
   code: string;
   timezone: string;
-}
+};
 
-interface Rating {
+type Rating = {
   average: number;
-}
+};
 
-interface Schedule {
+type Schedule = {
   time: string;
   days: string[];
-}
+};
+
+type WebChannel = {
+  id: number;
+  name: string;
+  country?: any;
+  officialSite: string;
+};

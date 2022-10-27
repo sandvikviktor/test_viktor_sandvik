@@ -14,8 +14,8 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
     <ShowsProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
-          <Stack.Screen name="Home" component={TvShows} />
-          <Stack.Screen name="Episode" component={ShowDetails} />
+          <Stack.Screen name="TvShows" component={TvShows} />
+          <Stack.Screen name="ShowDetails" component={ShowDetails} />
         </Stack.Navigator>
       </NavigationContainer>
     </ShowsProvider>

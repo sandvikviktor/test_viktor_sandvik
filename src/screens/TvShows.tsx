@@ -1,46 +1,44 @@
 import React from 'react';
-import {ScrollView, StyleSheet, TextInput} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {ScrollView, StyleSheet, TextInput, View} from 'react-native';
 import {API_BASE} from '../../env';
 import ShowListItem from '../components/ShowListItem';
-import {TvShow} from '../types';
-// import {useShows} from '../providers/shows/ShowsProvider';
+import {TvShow, TvShowResponse} from '../types';
 
 interface TvSeriesProps {}
 
 const TvShows: React.FC<TvSeriesProps> = () => {
-  // const {shows, setShows} = useShows();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [shows, setShows] = React.useState<TvShow[]>([]);
 
-  const searchForTvShows = async (query: string) => {
-    const response = await fetch(`${API_BASE}/search/shows?q=${query}`);
+  const searchForTvShows = async () => {
+    const response = await fetch(`${API_BASE}/search/shows?q=${searchQuery}`);
     const data = await response.json();
-    console.log(data);
-    console.warn(data);
-    setShows(data.map((show: any) => show.show));
-    // setSearchResults(data);
+    if (data.length > 0) {
+      const showsData = data.map((show: TvShowResponse) => show.show);
+      setShows(showsData);
+      setSearchQuery('');
+      // console.warn(showsData);
+    } else {
+      console.log('No shows were found');
+      setShows([]);
+    }
   };
-
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <TextInput
         style={styles.searchBar}
-        placeholder="Search for shows"
+        placeholder="Search for tv shows"
         onChangeText={e => setSearchQuery(e)}
         value={searchQuery}
         autoCorrect={false}
         onSubmitEditing={searchForTvShows}
       />
-      <ScrollView style={styles.searchResults}>
-        {/* {shows.map(show => (
-          <ShowListItem show={show} />
-        ))} */}
+      <ScrollView>
         {shows.map(show => (
           <ShowListItem key={show.id} show={show} />
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -53,12 +51,9 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     backgroundColor: '#fff',
-    padding: 15,
-    margin: 10,
+    padding: 20,
+    marginHorizontal: 10,
+    marginVertical: 20,
     borderRadius: 10,
-  },
-  searchResults: {
-    // flex: 1,
-    // backgroundColor: '#333',
   },
 });
