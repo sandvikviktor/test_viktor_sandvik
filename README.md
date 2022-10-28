@@ -31,12 +31,3 @@ I also would have added a proper drawer menu and a better design in general for 
 
 I decided to not use any global state management because I didn't need it for this size of project.
 But as the project grew with more screens and data, it would be more necessary.
-
-
-
-
-
-
-
-
-
