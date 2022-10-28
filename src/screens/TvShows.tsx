@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -15,10 +15,10 @@ import useDebounce from '../hooks/useDebounce';
 interface TvSeriesProps {}
 
 const TvShows: React.FC<TvSeriesProps> = () => {
-  const [shows, setShows] = React.useState<TvShow[]>([]);
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [shows, setShows] = useState<TvShow[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     searchForTvShows(debouncedSearchQuery);
@@ -57,7 +57,7 @@ const TvShows: React.FC<TvSeriesProps> = () => {
           />
         )}
       </View>
-      {shows.length === 0 && searchQuery.length > 0 && (
+      {!isLoading && debouncedSearchQuery !== '' && shows.length === 0 && (
         <Text style={styles.errorMessage}>No shows were found.</Text>
       )}
       <ScrollView>
