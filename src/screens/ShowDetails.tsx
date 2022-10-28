@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -9,6 +9,7 @@ import {
   View,
   ActivityIndicator,
   useWindowDimensions,
+  Pressable,
 } from 'react-native';
 import {API_BASE} from '../../env';
 import SeasonListItem from '../components/SeasonListItem';
@@ -19,24 +20,25 @@ interface ShowDetailsProps {
 
 const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
   const {showId, showName} = route.params;
-  const [show, setShow] = React.useState<TvShow>();
-  const [seasons, setSeasons] = React.useState<TvShowSeason[]>([]);
-  const [isImageLoading, setIsImageLoading] = React.useState(true);
-
-  const {height: screenHeight} = useWindowDimensions();
-
   const navigation = useNavigation();
   navigation.setOptions({title: showName});
 
-  // Get show details
-  React.useEffect(() => {
+  const [show, setShow] = useState<TvShow>();
+  const [seasons, setSeasons] = useState<TvShowSeason[]>([]);
+  const [isError, setIsError] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
+
+  const {height: screenHeight} = useWindowDimensions();
+
+  // Get show
+  useEffect(() => {
     if (showId) {
       getShowById(showId);
     }
   }, [showId]);
 
   // Get seasons when show data is set
-  React.useEffect(() => {
+  useEffect(() => {
     if (show) {
       getSeasonsByShowId(show.id);
     }
@@ -47,8 +49,10 @@ const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
     const data = await response.json();
     if (data) {
       setShow(data);
+      setIsError(false);
     } else {
       console.log('No show was found');
+      setIsError(true);
     }
   };
 
@@ -64,6 +68,18 @@ const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isError && (
+        <View style={styles.error}>
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <View style={styles.buttonContainer}>
+            <Pressable
+              onPress={() => getShowById(showId)}
+              style={styles.button}>
+              <Text>Try again</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
       <ScrollView>
         {isImageLoading && (
           <ActivityIndicator
@@ -152,5 +168,30 @@ const styles = StyleSheet.create({
     right: 20,
     top: 25,
     zIndex: 100,
+  },
+  error: {
+    paddingVertical: 18,
+  },
+  errorTitle: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    marginTop: 8,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  button: {
+    maxWidth: 100,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    color: '#000',
+    backgroundColor: 'white',
   },
 });
