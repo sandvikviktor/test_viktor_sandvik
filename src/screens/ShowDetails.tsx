@@ -7,26 +7,23 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import {API_BASE} from '../../env';
 import SeasonListItem from '../components/SeasonListItem';
 import {TvShow, TvShowSeason} from '../types';
-import ImageLayer from '../assets/gradient.png';
 interface ShowDetailsProps {
   route: any;
 }
-
-const window = Dimensions.get('window');
-const screen = Dimensions.get('screen');
 
 const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
   const {showId, showName} = route.params;
   const [show, setShow] = React.useState<TvShow>();
   const [seasons, setSeasons] = React.useState<TvShowSeason[]>([]);
   const [isImageLoading, setIsImageLoading] = React.useState(true);
-  const [dimensions, setDimensions] = React.useState({window, screen});
+
+  const {height: screenHeight} = useWindowDimensions();
 
   const navigation = useNavigation();
   navigation.setOptions({title: showName});
@@ -45,29 +42,24 @@ const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
     }
   }, [show]);
 
-  // Set dimensions on screen change
-  React.useEffect(() => {
-    const subscription = Dimensions.addEventListener(
-      'change',
-      ({window, screen}) => {
-        setDimensions({window, screen});
-      },
-    );
-    return () => subscription?.remove();
-  });
-
   const getShowById = async (id: string) => {
     const response = await fetch(`${API_BASE}/shows/${id}`);
     const data = await response.json();
-    // console.warn('API DETAILS:', data);
-    setShow(data);
+    if (data) {
+      setShow(data);
+    } else {
+      console.log('No show was found');
+    }
   };
 
   const getSeasonsByShowId = async (id: string) => {
     const response = await fetch(`${API_BASE}/shows/${id}/seasons`);
     const data = await response.json();
-    // console.warn('API SEASONS:', data);
-    setSeasons(data);
+    if (data.length > 0) {
+      setSeasons(data);
+    } else {
+      console.log('No seasons were found');
+    }
   };
 
   return (
@@ -80,7 +72,7 @@ const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
             color="#fff"
           />
         )}
-        <View style={(styles.header, {height: dimensions.screen.height * 0.6})}>
+        <View style={(styles.header, {height: screenHeight * 0.6})}>
           {show && (
             <Image
               style={styles.ImageBackground}
@@ -95,7 +87,10 @@ const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
               Rating: {show?.rating?.average ? show?.rating?.average : 0}
             </Text>
           </View>
-          <Image style={styles.ImageLayer} source={ImageLayer} />
+          <Image
+            style={styles.ImageLayer}
+            source={require('../assets/gradient.png')}
+          />
         </View>
         {seasons.length > 0 &&
           seasons.map((season, index) => (
