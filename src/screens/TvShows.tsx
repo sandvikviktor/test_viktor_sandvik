@@ -1,38 +1,65 @@
-import React from 'react';
-import {ScrollView, StyleSheet, TextInput, View} from 'react-native';
+import React, {useEffect} from 'react';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import {API_BASE} from '../../env';
 import ShowListItem from '../components/ShowListItem';
 import {TvShow, TvShowResponse} from '../types';
+import useDebounce from '../hooks/useDebounce';
 
 interface TvSeriesProps {}
 
 const TvShows: React.FC<TvSeriesProps> = () => {
-  const [searchQuery, setSearchQuery] = React.useState('');
   const [shows, setShows] = React.useState<TvShow[]>([]);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const searchForTvShows = async () => {
-    const response = await fetch(`${API_BASE}/search/shows?q=${searchQuery}`);
+  useEffect(() => {
+    searchForTvShows(debouncedSearchQuery);
+  }, [debouncedSearchQuery]);
+
+  const searchForTvShows = async (queryString: string) => {
+    setIsLoading(true);
+    const response = await fetch(`${API_BASE}/search/shows?q=${queryString}`);
     const data = await response.json();
     if (data.length > 0) {
       const showsData = data.map((show: TvShowResponse) => show.show);
       setShows(showsData);
-      setSearchQuery('');
-      // console.warn(showsData);
+      setIsLoading(false);
     } else {
       console.log('No shows were found');
       setShows([]);
+      setIsLoading(false);
     }
   };
+
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search for tv shows"
-        onChangeText={e => setSearchQuery(e)}
-        value={searchQuery}
-        autoCorrect={false}
-        onSubmitEditing={searchForTvShows}
-      />
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search for tv shows"
+          onChangeText={e => setSearchQuery(e)}
+          value={searchQuery}
+          autoCorrect={false}
+        />
+        {isLoading && (
+          <ActivityIndicator
+            style={styles.loadingSpinner}
+            size={'small'}
+            color="#000"
+          />
+        )}
+      </View>
+      {shows.length === 0 && searchQuery.length > 0 && (
+        <Text style={styles.errorMessage}>No shows were found.</Text>
+      )}
       <ScrollView>
         {shows.map(show => (
           <ShowListItem key={show.id} show={show} />
@@ -49,11 +76,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  searchContainer: {
+    position: 'relative',
+  },
   searchBar: {
     backgroundColor: '#fff',
     padding: 20,
     marginHorizontal: 10,
     marginVertical: 20,
     borderRadius: 10,
+  },
+  errorMessage: {
+    color: '#fff',
+    fontSize: 16,
+    marginHorizontal: 10,
+  },
+  loadingSpinner: {
+    position: 'absolute',
+    right: 26,
+    top: 38,
   },
 });
