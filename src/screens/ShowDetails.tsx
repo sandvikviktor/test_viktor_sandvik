@@ -105,7 +105,7 @@ const ShowDetails: React.FC<ShowDetailsProps> = ({route}) => {
           </View>
           <Image
             style={styles.ImageLayer}
-            source={require('../assets/gradient.png')}
+            source={require('../img/gradient.png')}
           />
         </View>
         {seasons.length > 0 &&
